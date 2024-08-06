@@ -6,13 +6,12 @@ import App from './App'
 import './index.css'
 import { handlers } from './api/mock'
 
-import { setupServer } from 'msw/node'
-export const apiServer = setupServer(...handlers)
-
+// import { setupServer } from 'msw/node'
+// export const apiServer = setupServer(...handlers)
 
 async function enableMocking() {
-  // const { setupWorker } = await import('msw/browser');
-  // return setupWorker(...handlers).start()
+    const { setupWorker } = await import('msw/browser');
+    return setupWorker(...handlers).start()
 }
 
 enableMocking().then(() => {

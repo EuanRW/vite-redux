@@ -1,10 +1,8 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit'
-import counterReducer from './counter/counterSlice'
 import notificationsReducer from './notifications/notificationsSlice'
 
 export const store = configureStore({
   reducer: {
-    counter: counterReducer,
     notifications: notificationsReducer,
   },
 })

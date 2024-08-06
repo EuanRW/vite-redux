@@ -1,17 +1,18 @@
 import { configureStore } from '@reduxjs/toolkit';
 import notificationsReducer, { resetStatus, getNotifications, sendNotification } from './notificationsSlice';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest'
-import { apiServer } from '../..';
 import notificationsSlice from './notificationsSlice';
 import { http, HttpResponse } from 'msw';
 import { Notification } from '../../types/Notification';
-
+import { setupServer } from 'msw/node'
+import { handlers } from '../../api/mock';
 describe('notificationsSlice', () => {
     const store = configureStore({
         reducer: {
             notifications: notificationsReducer,
         },
     });
+    const apiServer = setupServer(...handlers)
 
     beforeAll(() => apiServer.listen());
     afterEach(() => apiServer.resetHandlers());
