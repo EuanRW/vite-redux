@@ -1,0 +1,11 @@
+.govuk-header {
+    width: 100%;
+}
+
+.govuk-header__container {
+    display: flex;
+}
+
+.govuk-header__link svg {
+    margin-right: 5px;
+}

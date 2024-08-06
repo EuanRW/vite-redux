@@ -1,0 +1,8 @@
+.table-action-div {
+    display: flex;
+    justify-content: end;
+}
+
+.table-action-div button {
+    margin-bottom: 0;
+}
