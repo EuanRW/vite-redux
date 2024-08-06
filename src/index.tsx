@@ -4,26 +4,28 @@ import { Provider } from 'react-redux'
 import { store } from './redux/store'
 import App from './App'
 import './index.css'
+import { handlers } from './api/mock'
+
+import { setupServer } from 'msw/node'
+export const apiServer = setupServer(...handlers)
+
 
 async function enableMocking() {
-  if (process.env.NODE_ENV !== 'development') {
-    return
-  }
-
-  const { apiWorker } = await import('./api/mock')
-
-  return apiWorker.start()
+  // const { setupWorker } = await import('msw/browser');
+  // return setupWorker(...handlers).start()
 }
 
-const container = document.getElementById('root')!
-const root = createRoot(container)
-
 enableMocking().then(() => {
-  root.render(
-    <React.StrictMode>
-      <Provider store={store}>
-        <App />
-      </Provider>
-    </React.StrictMode>,
-  )
+  const container = document.getElementById('root')
+  if (container) {
+    const root = createRoot(container)
+
+    root.render(
+      <React.StrictMode>
+        <Provider store={store}>
+          <App />
+        </Provider>
+      </React.StrictMode>,
+    )
+  }
 })

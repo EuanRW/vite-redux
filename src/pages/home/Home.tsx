@@ -3,17 +3,16 @@ import { useNavigate } from 'react-router-dom'
 
 import GovUkTable from '../../components/GovUkTable'
 import './home.css'
-import { useDispatch, useSelector } from 'react-redux'
-import { AppDispatch, RootState } from '../../redux/store'
+import { useAppDispatch, useAppSelector } from '../../app/hooks'
 import { getNotifications } from '../../redux/notifications/notificationsSlice'
 
 const Home: React.FC = () => {
   const navigate = useNavigate()
-  const dispatch = useDispatch<AppDispatch>()
+  const dispatch = useAppDispatch()
 
-  const notifications = useSelector((state: RootState) => state.notifications.notifications)
-  const status = useSelector((state: RootState) => state.notifications.status)
-  const error = useSelector((state: RootState) => state.notifications.error)
+  const notifications = useAppSelector((state) => state.notifications.notifications)
+  const status = useAppSelector((state) => state.notifications.status)
+  const error = useAppSelector((state) => state.notifications.error)
 
   const TableRows = notifications.map((notification) => {
     return { id: notification.id.toString(), message: notification.message }

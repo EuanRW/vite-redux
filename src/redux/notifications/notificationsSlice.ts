@@ -58,7 +58,7 @@ const notificationsSlice = createSlice({
         state.status = 'succeeded'
         state.notifications.push(action.payload)
       })
-    // eslint-disable-next-line
+      // eslint-disable-next-line
             .addCase(sendNotification.rejected, (state, action: PayloadAction<any>) => {
         state.status = 'failed'
         state.error = action.payload

@@ -1,101 +1,100 @@
-// import { configureStore } from '@reduxjs/toolkit';
-// import notificationsReducer, { resetStatus, getNotifications, sendNotification } from './notificationsSlice';
-// import { Notification } from '../../types/Notification';
-// import { apiServer } from '../../api/mock';
-// import { rest } from 'msw';
-import { describe, expect, test } from 'vitest'
+import { configureStore } from '@reduxjs/toolkit';
+import notificationsReducer, { resetStatus, getNotifications, sendNotification } from './notificationsSlice';
+import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest'
+import { apiServer } from '../..';
+import notificationsSlice from './notificationsSlice';
+import { http, HttpResponse } from 'msw';
+import { Notification } from '../../types/Notification';
 
 describe('notificationsSlice', () => {
-  test('always passes', () => {
-    expect(true).toBe(true)
-  })
-})
+    const store = configureStore({
+        reducer: {
+            notifications: notificationsReducer,
+        },
+    });
 
-// describe('notificationsSlice', () => {
-//     const store = configureStore({
-//         reducer: {
-//             notifications: notificationsReducer,
-//         },
-//     });
+    beforeAll(() => apiServer.listen());
+    afterEach(() => apiServer.resetHandlers());
+    afterAll(() => apiServer.close());
 
-//     test('should return the initial state', () => {
-//         const state = store.getState().notifications;
-//         expect(state).toEqual({
-//             notifications: [],
-//             status: 'idle',
-//             error: null,
-//         });
-//     });
+    test('should return the initial state', () => {
+        const state = store.getState().notifications;
+        expect(state).toEqual({
+            notifications: [],
+            status: 'idle',
+            error: null,
+        });
+    });
 
-//     // test('should handle resetStatus', () => {
-//     //     store.dispatch(resetStatus());
-//     //     const state = store.getState().notifications;
-//     //     expect(state.status).toBe('idle');
-//     //     expect(state.error).toBeNull();
-//     // });
+    test('should handle resetStatus', () => {
+        store.dispatch(resetStatus());
+        const state = store.getState().notifications;
+        expect(state.status).toBe('idle');
+        expect(state.error).toBeNull();
+    });
 
-//     // describe('getNotifications thunk', () => {
-//     //     test('should handle pending state', async () => {
-//     //         store.dispatch(getNotifications.pending);
-//     //         const state = store.getState().notifications;
-//     //         expect(state.status).toBe('loading');
-//     //     });
+    describe('getNotifications thunk', () => {
+        test('should handle pending state', () => {
+            const action = { type: getNotifications.pending.type}
+            const newState = notificationsSlice(store.getState().notifications, action)
+            
+            expect(newState.status).toBe('loading');
+        });
 
-//     //     test('should handle fulfilled state', async () => {
-//     //         await store.dispatch(getNotifications());
+        test('should handle fulfilled state', async () => {
+            await store.dispatch(getNotifications());
 
-//     //         const state = store.getState().notifications;
-//     //         expect(state.status).toBe('succeeded');
-//     //         expect(state.notifications).toEqual([
-//     //             { id: '1', message: 'Test Notification 1' },
-//     //             { id: '2', message: 'Test Notification 2' },
-//     //         ]);
-//     //     });
+            const state = store.getState().notifications;
+            
+            expect(state.status).toBe('succeeded');
+            expect(state.notifications[0].message).toEqual('Initial message');
+        });
+      })
 
-//     //     test('should handle rejected state', async () => {
-//     //         server.use(
-//     //             rest.get('/api/notifications', (req, res, ctx) => {
-//     //                 return res(ctx.status(500), ctx.json({ message: 'Error fetching notifications' }));
-//     //             })
-//     //         );
+        test('should handle rejected state', async () => {
+            apiServer.use(
+              http.get('/api/notifications', () => {
+                return HttpResponse.json({ message: 'Error fetching notifications' }, { status: 500 })
+              })
+            );
 
-//     //         await store.dispatch(getNotifications());
+            await store.dispatch(getNotifications());
 
-//     //         const state = store.getState().notifications;
-//     //         expect(state.status).toBe('failed');
-//     //         expect(state.error).toEqual({ message: 'Error fetching notifications' });
-//     //     });
-//     // });
+            const state = store.getState().notifications;
+            expect(state.status).toBe('failed');
+            expect(state.error).toEqual({ message: 'Error fetching notifications' });
+        });
 
-//     // describe('sendNotification thunk', () => {
-//     //     test('should handle pending state', async () => {
-//     //         store.dispatch(sendNotification.pending);
-//     //         const state = store.getState().notifications;
-//     //         expect(state.status).toBe('loading');
-//     //     });
+    describe('sendNotification thunk', () => {
+        test('should handle pending state', () => {
+          const action = { type: sendNotification.pending.type}
+          const newState = notificationsSlice(store.getState().notifications, action)
+          
+          expect(newState.status).toBe('loading');
+      });
 
-//     //     test('should handle fulfilled state', async () => {
-//     //         const notification: Omit<Notification, 'id'> = { message: 'Test Notification 3' };
-//     //         await store.dispatch(sendNotification(notification));
+        test('should handle fulfilled state', async () => {
+            const notification: Omit<Notification, 'id'> = { message: 'Test Notification 3' };
+            await store.dispatch(sendNotification(notification));
 
-//     //         const state = store.getState().notifications;
-//     //         expect(state.status).toBe('succeeded');
-//     //         expect(state.notifications).toContainEqual({ id: '3', message: 'Test Notification 3' });
-//     //     });
+            const state = store.getState().notifications;
+            expect(state.status).toBe('succeeded');
+            expect(state.notifications[1].message).toEqual('Test Notification 3');
+        });
 
-//     //     test('should handle rejected state', async () => {
-//     //         server.use(
-//     //             rest.post('/api/notifications', (req, res, ctx) => {
-//     //                 return res(ctx.status(500), ctx.json({ message: 'Error sending notification' }));
-//     //             })
-//     //         );
+        test('should handle rejected state', async () => {
+            apiServer.use(
+              http.post('/api/notifications', () => {
+                return HttpResponse.json({ message: 'Error sending notification' }, { status: 500 })
+              })
+            );
 
-//     //         const notification: Omit<Notification, 'id'> = { message: 'Test Notification 3' };
-//     //         await store.dispatch(sendNotification(notification));
+            const notification: Omit<Notification, 'id'> = { message: 'Test Notification 3' };
+            await store.dispatch(sendNotification(notification));
 
-//     //         const state = store.getState().notifications;
-//     //         expect(state.status).toBe('failed');
-//     //         expect(state.error).toEqual({ message: 'Error sending notification' });
-//     //     });
-//     // });
-// });
+            const state = store.getState().notifications;
+            expect(state.status).toBe('failed');
+            expect(state.error).toEqual({ message: 'Error sending notification' });
+        });
+    });
+});

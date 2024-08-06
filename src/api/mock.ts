@@ -1,6 +1,4 @@
 import { http, HttpResponse } from 'msw'
-import { setupWorker } from 'msw/browser'
-// import { setupServer } from 'msw/node'
 import { Notification } from '../types/Notification'
 
 const allNotifications: Notification[] = [
@@ -22,6 +20,3 @@ export const handlers = [
     return HttpResponse.json({ id, message }, { status: 201 })
   }),
 ]
-
-export const apiWorker = setupWorker(...handlers)
-// export const apiServer = setupServer(...handlers)

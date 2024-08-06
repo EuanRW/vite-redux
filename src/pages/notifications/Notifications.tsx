@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react'
 import { Formik, Form, Field } from 'formik'
-import { useDispatch, useSelector } from 'react-redux'
+import { useAppDispatch, useAppSelector } from '../../app/hooks'
 import { resetStatus, sendNotification } from '../../redux/notifications/notificationsSlice'
-import { RootState, AppDispatch } from '../../redux/store'
 import './Notifications.css'
 
 interface FormValues {
@@ -10,9 +9,9 @@ interface FormValues {
 }
 
 const Notifications: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>()
-  const status = useSelector((state: RootState) => state.notifications.status)
-  const error = useSelector((state: RootState) => state.notifications.error)
+  const dispatch = useAppDispatch()
+  const status = useAppSelector((state) => state.notifications.status)
+  const error = useAppSelector((state) => state.notifications.error)
 
   useEffect(() => {
     dispatch(resetStatus())
